@@ -27,7 +27,7 @@ jobs:
 
       - name: Extract Android Project
         run: |
-          ZIP=$(find . -maxdepth 1 -name '*Android*Project*.zip' -print -quit)
+          ZIP="./Chouhan_Android_Project_2026_FIXED.zip"
           test -n "$ZIP"
           unzip -q "$ZIP"
 
