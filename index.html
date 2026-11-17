@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>Electrician Work with Chouhan</title>
+<style>
+:root{--bg:#0b1220;--panel:#111c2e;--panel2:#16243a;--blue:#2997ff;--blue2:#67bdff;--text:#f4f8ff;--muted:#9aabc2;--line:#263850;--danger:#ff647c;--green:#36d6a0}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1220,#101d32 60%,#0b1220);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+.wrap{max-width:980px;margin:auto;padding:18px 14px 40px}.header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 20px}.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:15px;object-fit:cover;box-shadow:0 8px 24px #1478d455}.brand h1{font-size:clamp(18px,4vw,25px);margin:0;letter-spacing:.2px}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}.badge{border:1px solid #2c4b70;color:#a9d9ff;background:#10243b;border-radius:30px;padding:7px 10px;font-size:11px;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:15px}.stat,.card{background:linear-gradient(150deg,#142238,#101a2b);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:0 8px 24px #0002}.stat small{color:var(--muted);display:block;font-size:12px}.stat strong{font-size:clamp(18px,4vw,25px);display:block;margin-top:5px;color:#fff}.stat .accent{color:var(--blue2)}
+.grid{display:flex;flex-direction:column;gap:14px}.listcard{order:0}.formcard{order:1;display:none}.formcard.open{display:block}.card h2{font-size:17px;margin:0 0 14px}.field{margin-bottom:12px}.field label{display:block;color:#c2d0e2;font-size:12px;margin:0 0 6px}.field input,.field textarea,.search{width:100%;background:#0b1525;border:1px solid #2a3e59;border-radius:10px;padding:12px;color:var(--text);font:inherit;outline:none}.field input:focus,.field textarea:focus,.search:focus{border-color:var(--blue);box-shadow:0 0 0 3px #2997ff22}.field textarea{min-height:72px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:11px;padding:11px 14px;font-weight:700;cursor:pointer;font-size:14px}.primary{background:linear-gradient(135deg,#2997ff,#1764c5);color:white;width:100%;box-shadow:0 7px 18px #1678d833}.secondary{background:#1a2c44;color:#dcecff;border:1px solid #345171}.danger{background:#3b1d2a;color:#ff9cab;border:1px solid #713348}.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tools .btn{flex:1}.listhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.listhead h2{margin:0}.search{max-width:230px;padding:9px 11px;font-size:13px}.entry{border:1px solid #273b55;background:#0d192a;border-radius:13px;padding:12px;margin-bottom:9px}.entrytop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.num{display:inline-grid;place-items:center;min-width:30px;height:30px;padding:0 7px;border-radius:9px;background:#183d63;color:#8fd0ff;font-weight:800;margin-right:8px}.place{font-weight:700;line-height:1.35}.date{font-size:12px;color:var(--muted);margin-top:4px}.amount{font-size:17px;font-weight:800;color:#8fd0ff;white-space:nowrap}.details{font-size:13px;color:#b6c5d8;margin:9px 0 0 39px;white-space:pre-wrap}.entryactions{display:flex;gap:7px;margin:10px 0 0 39px}.entryactions button{padding:6px 10px;font-size:12px}.empty{text-align:center;color:var(--muted);padding:35px 10px}.foot{text-align:center;color:#71839b;font-size:11px;margin-top:18px}.monthrow{display:flex;gap:8px;margin:0 0 12px}.monthrow input{background:#0b1525;border:1px solid #2a3e59;color:white;border-radius:9px;padding:8px}
+@media(max-width:720px){.grid{display:flex;flex-direction:column}.stats{gap:7px}.stat{padding:12px 10px}.header{align-items:flex-start}.badge{font-size:10px}.listhead{align-items:flex-start;flex-direction:column}.search{max-width:none}.row{gap:8px}}
+@media print{body{background:white;color:#111}.wrap{max-width:none;padding:0}.header .badge,.formcard,.tools,.search,.entryactions,.monthrow{display:none!important}.card,.stat,.entry{background:white;color:#111;border:1px solid #ccc;box-shadow:none;break-inside:avoid}.stat small,.date,.details{color:#444}.amount{color:#111}.grid{display:block}.listcard{margin-top:15px}.entry{margin-bottom:8px}.num{background:#eee;color:#111}}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<style>
+.authscreen{max-width:480px;margin:26px auto;padding:22px;background:#111c2e;border:1px solid #263850;border-radius:18px;box-shadow:0 14px 40px #0005}
+.authscreen h2{margin:0 0 8px}.authscreen p{color:#9aabc2;font-size:13px}.authscreen input,.authscreen select{width:100%;background:#0b1525;border:1px solid #2a3e59;border-radius:10px;padding:13px;color:white;font:inherit;margin:6px 0 12px}.authscreen label{font-size:12px;color:#c2d0e2}.authactions{display:flex;gap:8px}.authactions button{flex:1}.notice{font-size:12px;padding:10px;border-radius:10px;background:#352b17;color:#ffd98a;margin-top:10px}.hidden{display:none!important}.dashbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.dashbar .btn{flex:1}.customerentry{border:1px solid #273b55;background:#0d192a;border-radius:13px;padding:13px;margin:9px 0}
+</style></head>
+<body>
+<section class="authscreen" id="authScreen">
+ <div class="brand" style="margin-bottom:15px"><img class="logo" src="logo.webp" alt="Logo"><div><h1 style="font-size:20px">Electrician Work with Chouhan</h1><p>Secure Login · सुरक्षित लॉगिन</p></div></div>
+ <h2 id="authTitle">लॉगिन करें / Login</h2><p>अपने अकाउंट से लॉगिन करें या नया अकाउंट बनाएँ।</p>
+ <label>ईमेल / Email</label><input id="authEmail" type="email" autocomplete="username" placeholder="name@example.com">
+ <label>पासवर्ड / Password</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="कम से कम 6 अक्षर">
+ <div id="registerFields" class="hidden"><label>नाम / Name</label><input id="authName" placeholder="आपका नाम"><label>अकाउंट प्रकार / Account Type</label><select id="authRole"><option value="electrician">Electrician / इलेक्ट्रीशियन</option><option value="customer">Customer / ग्राहक</option></select></div>
+ <div class="authactions"><button class="btn primary" id="loginBtn">लॉगिन</button><button class="btn secondary" id="showRegisterBtn">नया अकाउंट</button></div>
+ <button class="btn secondary hidden" id="registerBtn" style="width:100%;margin-top:8px">रजिस्टर करें / Register</button>
+ <div id="authMessage" class="notice">Cloud Login चालू करने के लिए Firebase project configuration जोड़ना बाकी है।</div>
+</section>
+<section id="ownerDashboard" class="hidden">
+  <div class="card">
+    <h2>Owner Dashboard</h2>
+    <p>Pending Electrician Accounts</p>
+    <div id="ownerPendingUsers">
+      Pending अकाउंट लोड हो रहे हैं...
+    </div>
+    <button class="btn secondary" onclick="logout()">Logout</button>
+  </div>
+</section>
+<section class="wrap hidden" id="customerDashboard">
+ <header class="header"><div class="brand"><img class="logo" src="logo.webp"><div><h1>Customer Dashboard</h1><p>आपके काम और भुगतान का रिकॉर्ड</p></div></div><button class="btn secondary" id="customerLogout">Logout</button></header>
+ <div class="stats"><div class="stat"><small>कुल काम</small><strong id="custJobs">0</strong></div><div class="stat"><small>कुल रकम</small><strong id="custAmount">₹0</strong></div><div class="stat"><small>रिकॉर्ड</small><strong id="custStatus">Cloud</strong></div></div>
+ <section class="card"><h2>मेरे काम / My Work</h2><div id="customerEntries" class="empty">लोड हो रहा है...</div></section>
+</section>
+<div class="wrap hidden" id="electricianApp">
+ <header class="header">
+  <div class="brand"><img class="logo" src="logo.webp" alt="Chouhan Logo"><div><h1>Electrician Work with Chouhan</h1><p>Daily Work Register · डेली वर्क रजिस्टर</p></div></div>
+  <div style="display:flex;gap:7px;align-items:center"><span class="badge">PREMIUM • CLOUD READY</span><button class="btn secondary" id="electricianLogout" type="button">Logout</button></div>
+ </header>
+ <section class="card" id="ratePermissionCard" style="margin:12px 0"><h2>ग्राहकों को रेट दिखाने की अनुमति</h2><p style="color:#9aabc2;font-size:13px">एक बटन से सभी लिंक किए गए ग्राहकों के लिए रेट दिखाएँ या छिपाएँ।</p><button class="btn secondary" id="ratePermissionBtn" type="button">रेट दिखाना: बंद (OFF)</button><div id="ratePermissionStatus" class="date">डिफ़ॉल्ट रूप से रेट छिपे रहेंगे।</div></section>
+ <section class="stats">
+  <div class="stat"><small>Total Entries · कुल एंट्री</small><strong id="totalEntries">0</strong></div>
+  <div class="stat"><small>This Month · इस महीने की रकम</small><strong class="accent" id="monthTotal">₹0</strong></div>
+  <div class="stat"><small>All Work Total · कुल रकम</small><strong id="grandTotal">₹0</strong></div>
+ </section>
+ <div class="grid">
+  <section class="card formcard" id="formcard">
+   <h2 id="formTitle">＋ नई एंट्री / New Entry</h2>
+   <form id="entryForm">
+    <input type="hidden" id="editId">
+    <div class="row">
+     <div class="field"><label for="date">तारीख / Date</label><input id="date" type="date" required></div>
+     <div class="field"><label for="amount">रकम / Amount (₹)</label><input id="amount" inputmode="decimal" type="number" min="0" step="1" placeholder="जैसे 1000" required></div>
+    </div>
+    <div class="row">
+     <div class="field"><label for="entryType">एंट्री का प्रकार / Entry Type</label><select id="entryType" style="width:100%;background:#0b1525;border:1px solid #2a3e59;border-radius:10px;padding:12px;color:white"><option value="work">काम की कमाई / Work</option><option value="received">दूसरे मिस्त्री से मिले पैसे / Received from electrician</option></select></div>
+     <div class="field" id="daysField"><label for="days">काम के दिन / Work Days</label><select id="days" style="width:100%;background:#0b1525;border:1px solid #2a3e59;border-radius:10px;padding:12px;color:white"><option value="0.5">½ दिन</option><option value="1" selected>1 पूरा दिन</option><option value="1.5">1½ दिन</option><option value="2">2 दिन</option><option value="2.5">2½ दिन</option><option value="3">3 दिन</option></select></div>
+    </div>
+    <div class="field"><label for="customerEmail">ग्राहक का ईमेल (Customer Account Email)</label><input id="customerEmail" type="email" placeholder="ग्राहक के लॉगिन वाला ईमेल"></div>
+    <div class="field"><label for="place">काम की जगह / Customer or Location</label><input id="place" maxlength="100" placeholder="जैसे खजूरो की ढाणी" required></div>
+    <div class="field"><label for="details">काम का विवरण / Work Details (Optional)</label><textarea id="details" maxlength="500" placeholder="जैसे वायरिंग, पंखा फिटिंग, RCC..."></textarea></div>
+    <button class="btn primary" id="saveBtn" type="submit">एंट्री सेव करें / Save Entry</button>
+    <div class="tools"><button class="btn secondary" type="button" id="cancelBtn" style="display:none">Cancel Edit</button><button class="btn secondary" type="button" id="clearBtn">फॉर्म साफ करें / Clear</button></div>
+   </form>
+  </section>
+  <section class="card listcard">
+   <div class="listhead"><h2>📋 Work History · काम की लिस्ट</h2><div style="display:flex;gap:8px;flex-wrap:wrap;width:100%;justify-content:flex-end"><button class="btn primary" type="button" id="addBtn" style="width:auto">＋ नई एंट्री / Add</button><input class="search" id="search" placeholder="Search / खोजें..."></div></div>
+   <div class="monthrow"><input type="month" id="monthFilter" aria-label="Filter by month"><button class="btn secondary" id="allBtn" type="button">सभी / All</button></div>
+   <div id="entries"></div><button class="btn secondary" id="moreBtn" type="button" style="width:100%;display:none;margin:8px 0">और एंट्री देखें / Load More</button>
+   <div class="tools"><button class="btn secondary" id="csvBtn" type="button">Excel / CSV</button><button class="btn secondary" id="shareBtn" type="button">Share / शेयर</button><button class="btn secondary" id="pdfBtn" type="button">PDF / Print</button></div>
+  </section>
+ </div>
+ <div class="foot">आपका डेटा इसी डिवाइस के ब्राउज़र में सेव होता है। ब्राउज़र डेटा साफ करने से पहले CSV बैकअप ले लें।<br>Your entries are stored on this device in this browser.</div>
+</div></div>
+<script>
+const KEY='electrician_work_chouhan_v1';
+let entries=[]; try{entries=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){entries=[]}
+let visibleCount=25;
+const $=id=>document.getElementById(id);
+const today=()=>{let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+$('date').value=today();
+$('addBtn').addEventListener('click',()=>{resetForm();$('formcard').classList.add('open');$('formcard').scrollIntoView({behavior:'smooth',block:'start'});});
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:0});
+const save=()=>localStorage.setItem(KEY,JSON.stringify(entries));
+function updateStats(){
+ $('totalEntries').textContent=entries.length;
+ let ym=today().slice(0,7), mt=entries.filter(e=>e.date.startsWith(ym)).reduce((s,e)=>s+Number(e.amount),0);
+ $('monthTotal').textContent=money(mt);
+ $('grandTotal').textContent=money(entries.reduce((s,e)=>s+Number(e.amount),0));
+}
+function render(){
+ updateStats();let q=$('search').value.toLowerCase(),m=$('monthFilter').value;
+ let filtered=entries.filter(e=>(!m||e.date.startsWith(m))&&(!q||`${e.place} ${e.details} ${e.date} ${e.amount}`.toLowerCase().includes(q)));
+ filtered.sort((a,b)=>b.date.localeCompare(a.date)||b.created-b.created);
+ let shown=filtered.slice(0,visibleCount); $('moreBtn').style.display=filtered.length>visibleCount?'block':'none';
+ $('entries').innerHTML=shown.length?shown.map(e=>`<article class="entry">
+  <div class="entrytop"><div><span class="num">${e.no}</span><span class="place">${esc(e.place)}</span><div class="date">${formatDate(e.date)}</div></div><div class="amount">${money(e.amount)}</div></div>
+  ${e.details?`<div class="details">${esc(e.details)}</div>`:''}
+  <div class="entryactions"><button class="btn secondary" onclick="editEntry('${e.id}')">✏️ Edit</button><button class="btn danger" onclick="deleteEntry('${e.id}')">Delete / हटाएँ</button></div>
+ </article>`).join(''):'<div class="empty">अभी कोई एंट्री नहीं है।<br>No work entries yet.</div>';
+}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function formatDate(s){if(!s)return '';let [y,m,d]=s.split('-');return `${d}/${m}/${y}`}
+$('entryForm').addEventListener('submit',ev=>{
+ ev.preventDefault();let id=$('editId').value;
+ let type=$('entryType').value;let obj={id:id||String(Date.now()),date:$('date').value,amount:Number($('amount').value),place:type==='received'?'दूसरे मिस्त्री से प्राप्त':$('place').value.trim(),details:$('details').value.trim(),customerEmail:$('customerEmail').value.trim().toLowerCase(),type:type,days:type==='work'?Number($('days').value):0,created:Date.now()};
+ if((type==='work'&&!obj.place)||!obj.date||obj.amount<0)return;
+ if(id){let old=entries.find(e=>e.id===id);obj.no=old.no;obj.created=old.created;entries=entries.map(e=>e.id===id?obj:e)}
+ else{obj.no=entries.reduce((n,e)=>Math.max(n,e.no||0),0)+1;entries.push(obj)}
+ save();resetForm();$('formcard').classList.remove('open');render();syncCloudEntry(obj);
+});
+function resetForm(){ $('entryForm').reset();$('date').value=today();
+$('entryType').value='work';$('days').value='1';$('editId').value='';$('formTitle').textContent='＋ नई एंट्री / New Entry';$('saveBtn').textContent='एंट्री सेव करें / Save Entry';$('cancelBtn').style.display='none'}
+window.editEntry=id=>{let e=entries.find(x=>x.id===id);if(!e)return;$('editId').value=e.id;$('date').value=e.date;$('amount').value=e.amount;$('place').value=e.place;$('details').value=e.details;$('customerEmail').value=e.customerEmail||'';$('entryType').value=e.type||'work';$('days').value=String(e.days||1);$('formTitle').textContent='✏️ एंट्री एडिट करें / Edit Entry';$('saveBtn').textContent='बदलाव सेव करें / Update Entry';$('cancelBtn').style.display='inline-block';$('formcard').classList.add('open');$('formcard').scrollIntoView({behavior:'smooth',block:'start'})};
+window.deleteEntry=id=>{if(confirm('क्या आप यह एंट्री हटाना चाहते हैं? / Delete this entry?')){entries=entries.filter(e=>e.id!==id);save();render();if($('editId').value===id)resetForm()}};
+$('entryType').addEventListener('change',()=>{$('daysField').style.display=$('entryType').value==='work'?'block':'none';$('place').required=$('entryType').value==='work';$('place').placeholder=$('entryType').value==='work'?'जैसे खजूरो की ढाणी':'जरूरी नहीं';});
+$('moreBtn').onclick=()=>{visibleCount+=25;render()};
+$('search').addEventListener('input',()=>{visibleCount=25;render()});$('monthFilter').addEventListener('change',()=>{visibleCount=25;render()});
+$('shareBtn').onclick=async()=>{let text='Electrician Work with Chouhan\nकुल एंट्री: '+entries.length+'\nकुल रकम: '+money(entries.reduce((a,e)=>a+Number(e.amount||0),0));try{if(navigator.share)await navigator.share({title:'Electrician Work with Chouhan',text});else{await navigator.clipboard.writeText(text);alert('शेयर टेक्स्ट कॉपी हो गया।')}}catch(e){}};
+$('cancelBtn').onclick=()=>{resetForm();$('formcard').classList.remove('open')};$('clearBtn').onclick=()=>{if(!$('editId').value){$('entryForm').reset();$('date').value=today()}else resetForm()};
+$('search').addEventListener('input',render);$('monthFilter').addEventListener('change',render);$('allBtn').onclick=()=>{$('monthFilter').value='';$('search').value='';render()};
+$('pdfBtn').onclick=()=>window.print();
+$('csvBtn').onclick=()=>{
+ let rows=[['Entry No','Date','Amount INR','Location / Customer','Work Details','Entry Type','Work Days'],...entries.slice().sort((a,b)=>a.no-b.no).map(e=>[e.no,e.date,e.amount,e.place,e.details,e.type||'work',e.days||1])];
+ let csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Electrician-Work-Chouhan.csv';a.click();URL.revokeObjectURL(url);
+};
+render();
+
+// Firebase Cloud setup: paste your project's web config below before release.
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAvQ5jIyoS--TbWRflwKhNjndA1bc_Jn8E",
+  authDomain: "electrician-work-chouhan.firebaseapp.com",
+  projectId: "electrician-work-chouhan",
+  storageBucket: "electrician-work-chouhan.firebasestorage.app",
+  messagingSenderId: "467155369781",
+  appId: "1:467155369781:web:de68476e1b3cbf346c967c"
+};
+let cloudReady=false, auth=null, db=null, currentProfile=null, registerMode=false;
+const configured = FIREBASE_CONFIG.apiKey !== "PASTE_FIREBASE_API_KEY" && FIREBASE_CONFIG.projectId !== "PASTE_PROJECT_ID";
+if(configured && window.firebase){try{firebase.initializeApp(FIREBASE_CONFIG);auth=firebase.auth();db=firebase.firestore();cloudReady=true;$('authMessage').textContent='Cloud Login तैयार है।';}catch(err){$('authMessage').textContent='Firebase सेटअप त्रुटि: '+err.message;}}
+else $('authMessage').textContent='Firebase Web App config जोड़ना बाकी है।';
+function authMsg(t){$('authMessage').textContent=t;}
+$('showRegisterBtn').onclick=()=>{registerMode=true;$('registerFields').classList.remove('hidden');$('registerBtn').classList.remove('hidden');$('loginBtn').classList.add('hidden');$('showRegisterBtn').classList.add('hidden');$('authTitle').textContent='नया अकाउंट बनाएँ / Register';};
+$('registerBtn').onclick=async()=>{
+if(!cloudReady)return authMsg('पहले Firebase Web App config जोड़ना जरूरी है।');
+
+let email=$('authEmail').value.trim().toLowerCase();
+let pass=$('authPassword').value;
+let name=$('authName').value.trim();
+let role=$('authRole').value;
+
+if(!email||pass.length<6||!name)
+return authMsg('नाम, सही ईमेल और कम से कम 6 अक्षर का पासवर्ड भरें।');
+
+try{
+let cred=await auth.createUserWithEmailAndPassword(email,pass);
+
+await db.collection('users').doc(cred.user.uid).set({
+  uid:cred.user.uid,
+  name,
+  email,
+  role,
+  status:'pending',
+  createdAt:firebase.firestore.FieldValue.serverTimestamp()
+});
+
+await auth.signOut();
+authMsg('रजिस्ट्रेशन सफल! Owner की मंजूरी मिलने के बाद लॉगिन करें।');
+
+}catch(e){
+authMsg(e.message);
+}
+};
+$('loginBtn').onclick=async()=>{if(!cloudReady)return authMsg('Login चालू करने के लिए Firebase Web App config चाहिए।');try{await auth.signInWithEmailAndPassword($('authEmail').value.trim().toLowerCase(),$('authPassword').value);}catch(e){authMsg(e.message);}};
+async function logout(){if(auth)await auth.signOut();}
+$('customerLogout').onclick=logout;$('electricianLogout').onclick=logout;
+async function setRatePermission(enabled){if(!currentProfile||currentProfile.role!=='electrician')return;await db.collection('settings').doc(currentProfile.uid).set({electricianUid:currentProfile.uid,showRatesToAllCustomers:!!enabled,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});updateRatePermissionUI(!!enabled);}
+function updateRatePermissionUI(enabled){let b=$('ratePermissionBtn');if(!b)return;b.textContent=enabled?'रेट दिखाना: चालू (ON)':'रेट दिखाना: बंद (OFF)';b.className='btn '+(enabled?'primary':'secondary');$('ratePermissionStatus').textContent=enabled?'सभी लिंक किए गए ग्राहकों को रेट दिखाई देंगे।':'सभी ग्राहकों से रेट छिपे हुए हैं।';}
+$('ratePermissionBtn').onclick=async()=>{try{let ref=db.collection('settings').doc(currentProfile.uid),snap=await ref.get(),now=!!(snap.exists&&snap.data().showRatesToAllCustomers);await setRatePermission(!now);}catch(e){alert('Permission सेव नहीं हुई: '+e.message);}};
+if(cloudReady){
+  auth.onAuthStateChanged(async user=>{
+    if(!user){
+      currentProfile=null;
+      $('authScreen').classList.remove('hidden');
+      $('electricianApp').classList.add('hidden');
+      $('customerDashboard').classList.add('hidden');
+      return;
+    }
+
+    try{
+      let snap=await db.collection('users').doc(user.uid).get();
+
+      if(!snap.exists){
+        await auth.signOut();
+        authMsg('अकाउंट प्रोफाइल नहीं मिली।');
+        return;
+   }
+      
+      currentProfile={uid:user.uid,...snap.data()};
+
+      if(currentProfile.status!=='approved'){
+        let status=currentProfile.status;
+
+        await auth.signOut();
+
+        if(status==='rejected'){
+          authMsg('आपका अकाउंट Owner ने Reject कर दिया है।');
+        }else{
+          authMsg('आपका अकाउंट अभी Pending है। Owner की मंजूरी का इंतजार करें।');
+        }
+        return;
+      }
+
+      if(currentProfile.role==='electrician'){
+        await migrateLocalEntriesToCloud();
+
+        let setting=await db.collection('settings').doc(user.uid).get();
+
+        if(!setting.exists){
+          await db.collection('settings').doc(user.uid).set({
+            electricianUid:user.uid,
+            showRatesToAllCustomers:false
+          });
+        }
+
+        updateRatePermissionUI(
+          !!(setting.exists&&setting.data().showRatesToAllCustomers)
+        );
+      }
+
+ $('authScreen').classList.add('hidden');
+$('customerDashboard').classList.add('hidden');
+$('electricianApp').classList.add('hidden');
+$('ownerDashboard').classList.add('hidden');
+
+if(currentProfile.role==='owner'){
+  $('ownerDashboard').classList.remove('hidden');
+  await loadPendingUsers();
+
+}else if(currentProfile.role==='customer'){
+  $('customerDashboard').classList.remove('hidden');
+  await loadCustomerRecords(currentProfile.email);
+
+}else if(currentProfile.role==='electrician'){
+  $('electricianApp').classList.remove('hidden');
+
+}else{
+  await auth.signOut();
+  authMsg('अकाउंट का प्रकार सही नहीं है।');
+}
+    }catch(e){
+      authMsg(e.message);
+    }
+  });
+}
+async function migrateLocalEntriesToCloud(){try{for(const e of entries){let email=(e.customerEmail||'').toLowerCase();let base={id:e.id,no:e.no,date:e.date,place:e.place,details:e.details,type:e.type||'work',days:e.days||0,created:e.created,customerEmail:email,electricianUid:currentProfile.uid,amount:firebase.firestore.FieldValue.delete(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()};await db.collection('workEntries').doc(e.id).set(base,{merge:true});if(email)await db.collection('workRates').doc(e.id).set({entryId:e.id,electricianUid:currentProfile.uid,customerEmail:email,amount:Number(e.amount||0),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});}}catch(e){console.warn('Local history cloud migration pending',e);}}
+async function loadCustomerRecords(email){try{let snap=await db.collection('workEntries').where('customerEmail','==',email).get(),arr=snap.docs.map(d=>d.data());let ratesById={};for(const owner of [...new Set(arr.map(e=>e.electricianUid).filter(Boolean))]){let setting=await db.collection('settings').doc(owner).get();if(setting.exists&&setting.data().showRatesToAllCustomers){let rs=await db.collection('workRates').where('electricianUid','==',owner).where('customerEmail','==',email).get();rs.docs.forEach(d=>ratesById[d.id]=d.data().amount);}}$('custJobs').textContent=arr.length;let visible=arr.filter(e=>Object.prototype.hasOwnProperty.call(ratesById,e.id));$('custAmount').textContent=visible.length?money(visible.reduce((a,e)=>a+Number(ratesById[e.id]||0),0)):'रेट छिपे हैं';$('customerEntries').innerHTML=arr.length?arr.map(e=>`<article class="customerentry"><b>${esc(e.place||'काम')}</b><div class="date">${formatDate(e.date)} · ${e.status||'रिकॉर्ड'}</div><div class="amount">${Object.prototype.hasOwnProperty.call(ratesById,e.id)?money(ratesById[e.id]):'रेट अभी उपलब्ध नहीं है'}</div><div class="details">${esc(e.details||'')}</div></article>`).join(''):'अभी आपके ईमेल से कोई काम लिंक नहीं है।';}catch(e){$('customerEntries').textContent='रिकॉर्ड लोड नहीं हुए: '+e.message;}}
+// OWNER APPROVAL FUNCTIONS
+async function loadPendingUsers(){
+  if(!currentProfile || currentProfile.role!=='owner') return;
+
+  let box=$('ownerPendingUsers');
+  if(!box) return;
+
+  try{
+    let snap=await db.collection('users')
+      .where('status','==','pending')
+      .get();
+
+    box.innerHTML=snap.empty
+      ? 'कोई Pending अकाउंट नहीं है।'
+      : snap.docs.map(doc=>{
+          let u=doc.data();
+          return `
+            <div class="card">
+              <b>${esc(u.name||'नाम नहीं')}</b>
+              <p>${esc(u.email||'')}</p>
+              <p>Role: ${esc(u.role||'')}</p>
+              <button onclick="approveUser('${doc.id}')">Approve</button>
+              <button onclick="rejectUser('${doc.id}')">Reject</button>
+            </div>`;
+        }).join('');
+
+  }catch(e){
+    box.textContent='लोड नहीं हुआ: '+e.message;
+  }
+}
+
+async function approveUser(uid){
+  if(!currentProfile || currentProfile.role!=='owner') return;
+  try{
+    await db.collection('users').doc(uid).update({
+      status:'approved'
+    });
+    await loadPendingUsers();
+  }catch(e){
+    alert('Approve नहीं हुआ: '+e.message);
+  }
+}
+
+async function rejectUser(uid){
+  if(!currentProfile || currentProfile.role!=='owner') return;
+  try{
+    await db.collection('users').doc(uid).update({
+      status:'rejected'
+    });
+    await loadPendingUsers();
+  }catch(e){
+    alert('Reject नहीं हुआ: '+e.message);
+  }
+}
+// Save customer-visible work details separately from private rates.
+async function syncCloudEntry(e){if(!cloudReady||!currentProfile||currentProfile.role!=='electrician')return;let email=(e.customerEmail||'').trim().toLowerCase();if(!email)return;try{await db.collection('workEntries').doc(e.id).set({id:e.id,no:e.no,date:e.date,place:e.place,details:e.details,type:e.type||'work',days:e.days||0,created:e.created,customerEmail:email,electricianUid:currentProfile.uid,amount:firebase.firestore.FieldValue.delete(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});await db.collection('workRates').doc(e.id).set({entryId:e.id,electricianUid:currentProfile.uid,customerEmail:email,amount:Number(e.amount||0),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});}catch(err){alert('Cloud Sync नहीं हुआ: '+err.message+'। फोन में लोकल रिकॉर्ड सेव है।');}}
+</script>
+</body></html>
