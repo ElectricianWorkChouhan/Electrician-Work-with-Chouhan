@@ -1,4 +1,4 @@
-name: Build Electrician Work APK
+Build Electrician Work APK
 
 on:
 workflow_dispatch:
@@ -54,3 +54,4 @@ steps:
       name: Electrician-Work-with-Chouhan-APK
       path: extracted/**/app/build/outputs/apk/debug/app-debug.apk
       if-no-files-found: error
+      
