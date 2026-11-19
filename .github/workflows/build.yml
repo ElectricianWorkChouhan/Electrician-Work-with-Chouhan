@@ -28,7 +28,7 @@ jobs:
 
       - name: Extract Android Project
         run: |
-          ZIP="./Electrician-Work-with-Chouhan-V1.8-CSV-PDF-SHARE-PAYMENTS.zip"
+          ZIP_FILE: Electrician-Work-with-Chouhan-V1.9-FIXED.zip
           test -f "$ZIP"
           mkdir -p extracted
           unzip -q "$ZIP" -d extracted
