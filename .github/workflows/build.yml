@@ -17,7 +17,7 @@ jobs:
 
       - name: Extract ZIP
         run: |
-          ZIP_FILE="Electrician-Work-with-Chouhan-V2.1-CLOUD-SYNC.zip"
+          ZIP_FILE="Electrician-Work-with-Chouhan-V2.1-CLOUD-SYNC-1.zip"
           if [ ! -f "$ZIP_FILE" ]; then
             echo "ZIP not found"
             ls -la
