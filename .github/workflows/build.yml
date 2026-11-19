@@ -4,8 +4,8 @@ on:
 workflow_dispatch:
 push:
 paths:
-- '*.zip'
-- '.github/workflows/**'
+- "*.zip"
+- ".github/workflows/**"
 
 jobs:
 build:
@@ -19,27 +19,33 @@ steps:
     uses: actions/setup-java@v5
     with:
       distribution: temurin
-      java-version: '17'
+      java-version: "17"
 
   - name: Setup Gradle
     uses: gradle/actions/setup-gradle@v4
     with:
-      gradle-version: '8.9'
+      gradle-version: "8.9"
 
   - name: Extract Android Project
     env:
       ZIP_FILE: Electrician-Work-with-Chouhan-V1.9-FIXED.zip
     run: |
-      test -f "$ZIP_FILE"
+      if [ ! -f "$ZIP_FILE" ]; then
+        echo "ZIP file not found: $ZIP_FILE"
+        ls -la
+        exit 1
+      fi
       mkdir -p extracted
       unzip -q "$ZIP_FILE" -d extracted
 
   - name: Build APK
     run: |
       SETTINGS_FILE=$(find extracted -name settings.gradle.kts -print -quit)
-      test -n "$SETTINGS_FILE"
+      if [ -z "$SETTINGS_FILE" ]; then
+        echo "Android project settings.gradle.kts not found"
+        exit 1
+      fi
       PROJECT_DIR=$(dirname "$SETTINGS_FILE")
-      echo "Project directory: $PROJECT_DIR"
       gradle -p "$PROJECT_DIR" assembleDebug
 
   - name: Upload APK
