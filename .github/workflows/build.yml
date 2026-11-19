@@ -15,21 +15,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Find and Extract V2.0 ZIP
+      - name: Extract ZIP
         run: |
           ZIP_FILE="Electrician-Work-with-Chouhan-V2.0-FIXED.zip"
           if [ ! -f "$ZIP_FILE" ]; then
-            echo "ZIP file not found: $ZIP_FILE"
+            echo "ZIP not found"
             ls -la
             exit 1
           fi
-          mkdir project
           unzip -q "$ZIP_FILE" -d project
-          echo "ZIP extracted successfully"
 
-      - name: Locate Android Project
+      - name: Find Gradle Wrapper
         run: |
-          find project -name settings.gradle.kts -o -name settings.gradle
+          find project -name gradlew -type f
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
@@ -39,8 +37,12 @@ jobs:
 
       - name: Build APK
         run: |
-          cd project
-          PROJECT_DIR=$(find . -name settings.gradle.kts -o -name settings.gradle | head -n 1 | xargs dirname)
+          WRAPPER=$(find project -name gradlew -type f | head -n 1)
+          if [ -z "$WRAPPER" ]; then
+            echo "gradlew not found inside ZIP"
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$WRAPPER")
           cd "$PROJECT_DIR"
           chmod +x gradlew
           ./gradlew assembleDebug
