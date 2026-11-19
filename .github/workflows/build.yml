@@ -28,9 +28,9 @@ jobs:
 
       - name: Extract Android Project
         run: |
-          Electrician-Work-Owner-Dashboard-V1.6.zip
+          ZIP="./Electrician-Work-Owner-Dashboard-V1.6.zip"
           test -f "$ZIP"
-          mkdir extracted
+          mkdir -p extracted
           unzip -q "$ZIP" -d extracted
 
       - name: Build APK
