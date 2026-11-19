@@ -1,4 +1,4 @@
-name: Electrician Work Chouhan V2.0 APK Build
+name: Electrician Work Chouhan V2.1 APK Build
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
 
       - name: Extract ZIP
         run: |
-          ZIP_FILE="Electrician-Work-with-Chouhan-V2.0-FIXED.zip"
+          ZIP_FILE="Electrician-Work-with-Chouhan-V2.1-CLOUD-SYNC.zip"
           if [ ! -f "$ZIP_FILE" ]; then
             echo "ZIP not found"
             ls -la
@@ -55,6 +55,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Electrician-Work-with-Chouhan-V2.0-debug-apk
+          name: Electrician-Work-with-Chouhan-V2.1-debug-apk
           path: project/**/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
