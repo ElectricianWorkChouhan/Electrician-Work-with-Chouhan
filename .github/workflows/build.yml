@@ -1,48 +1,50 @@
 name: Build Electrician Work APK
 
 on:
-  workflow_dispatch:
-  push:
-    paths:
-      - '*.zip'
-      - '.github/workflows/**'
+workflow_dispatch:
+push:
+paths:
+- '*.zip'
+- '.github/workflows/**'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
+  - name: Setup Java
+    uses: actions/setup-java@v5
+    with:
+      distribution: temurin
+      java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
+  - name: Setup Gradle
+    uses: gradle/actions/setup-gradle@v4
+    with:
+      gradle-version: '8.9'
 
-      - name: Extract Android Project
-        run: |
-          ZIP_FILE: Electrician-Work-with-Chouhan-V1.9-FIXED.zip
-          test -f "$ZIP"
-          mkdir -p extracted
-          unzip -q "$ZIP" -d extracted
+  - name: Extract Android Project
+    env:
+      ZIP_FILE: Electrician-Work-with-Chouhan-V1.9-FIXED.zip
+    run: |
+      test -f "$ZIP_FILE"
+      mkdir -p extracted
+      unzip -q "$ZIP_FILE" -d extracted
 
-      - name: Build APK
-        run: |
-          SETTINGS_FILE=$(find extracted -name settings.gradle.kts -print -quit)
-          test -n "$SETTINGS_FILE"
-          PROJECT_DIR=$(dirname "$SETTINGS_FILE")
-          echo "Project directory: $PROJECT_DIR"
-          gradle -p "$PROJECT_DIR" assembleDebug
+  - name: Build APK
+    run: |
+      SETTINGS_FILE=$(find extracted -name settings.gradle.kts -print -quit)
+      test -n "$SETTINGS_FILE"
+      PROJECT_DIR=$(dirname "$SETTINGS_FILE")
+      echo "Project directory: $PROJECT_DIR"
+      gradle -p "$PROJECT_DIR" assembleDebug
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Electrician-Work-with-Chouhan-APK
-          path: extracted/**/app/build/outputs/apk/debug/app-debug.apk
+  - name: Upload APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: Electrician-Work-with-Chouhan-APK
+      path: extracted/**/app/build/outputs/apk/debug/app-debug.apk
+      if-no-files-found: error
