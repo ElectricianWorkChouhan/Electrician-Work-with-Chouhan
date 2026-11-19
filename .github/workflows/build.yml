@@ -28,7 +28,7 @@ jobs:
 
       - name: Extract Android Project
         run: |
-          ZIP="./Electrician-Work-Owner-Dashboard-V1.5.zip"
+          Electrician-Work-Owner-Dashboard-V1.6.zip
           test -f "$ZIP"
           mkdir extracted
           unzip -q "$ZIP" -d extracted
