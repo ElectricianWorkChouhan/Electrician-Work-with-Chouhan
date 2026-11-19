@@ -15,27 +15,39 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Find and Extract V2.0 ZIP
+        run: |
+          ZIP_FILE="Electrician-Work-with-Chouhan-V2.0-FIXED.zip"
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "ZIP file not found: $ZIP_FILE"
+            ls -la
+            exit 1
+          fi
+          mkdir project
+          unzip -q "$ZIP_FILE" -d project
+          echo "ZIP extracted successfully"
+
+      - name: Locate Android Project
+        run: |
+          find project -name settings.gradle.kts -o -name settings.gradle
+
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
       - name: Build APK
         run: |
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          else
-            gradle assembleDebug
-          fi
+          cd project
+          PROJECT_DIR=$(find . -name settings.gradle.kts -o -name settings.gradle | head -n 1 | xargs dirname)
+          cd "$PROJECT_DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Electrician-Work-with-Chouhan-V2.0-APK
-          path: app/build/outputs/apk/debug/*.apk
+          name: Electrician-Work-with-Chouhan-V2.0-debug-apk
+          path: project/**/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
