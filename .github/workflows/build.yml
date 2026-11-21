@@ -1,60 +1,38 @@
-name: Electrician Work Chouhan V2.1 APK Build
+name: Android APK Build
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract ZIP
-        run: |
-          ZIP_FILE="Electrician-Work-with-Chouhan-V2.1-CLOUD-SYNC-1.zip"
-          if [ ! -f "$ZIP_FILE" ]; then
-            echo "ZIP not found"
-            ls -la
-            exit 1
-          fi
-          unzip -q "$ZIP_FILE" -d project
-
-      - name: Find Android Project
-        run: |
-          find project -name settings.gradle.kts -o -name settings.gradle
-
-      - name: Setup Java 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Install Gradle 8.9
-        uses: gradle/gradle-build-action@v3
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.9
+          gradle-version: '8.9'
 
-      - name: Build APK
-        run: |
-          BUILD_FILE=$(find project -name build.gradle.kts -path '*/app/build.gradle.kts' | head -n 1)
-          if [ -z "$BUILD_FILE" ]; then
-            echo "App build file not found"
-            exit 1
-          fi
-          APP_DIR=$(dirname "$BUILD_FILE")
-          PROJECT_DIR=$(dirname "$APP_DIR")
-          cd "$PROJECT_DIR"
-          gradle assembleDebug
+      - name: Build Debug APK
+        working-directory: Electrician-Work-with-Chouhan-Updated
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Electrician-Work-with-Chouhan-V2.1-debug-apk
-          path: project/**/app/build/outputs/apk/debug/*.apk
+          name: Electrician-Work-with-Chouhan-V2.2-debug-apk
+          path: Electrician-Work-with-Chouhan-Updated/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          
