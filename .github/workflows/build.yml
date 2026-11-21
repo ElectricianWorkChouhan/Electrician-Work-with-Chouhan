@@ -1,10 +1,10 @@
-name: Build Electrician Work V2.3.4 APK
+name: Build Electrician Work V2.3.5 APK
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'Electrician-Work-with-Chouhan-V2.3.4-Add-Electrician-Full-Options.zip'
+      - 'Electrician-Work-with-Chouhan-V2.3.5-FULL-Project.zip'
       - '.github/workflows/**'
 
 jobs:
@@ -26,12 +26,12 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Extract V2.3.4 ZIP
+      - name: Extract V2.3.5 Project ZIP
         run: |
-          ZIP_FILE="Electrician-Work-with-Chouhan-V2.3.4-Add-Electrician-Full-Options.zip"
+          ZIP_FILE="Electrician-Work-with-Chouhan-V2.3.5-FULL-Project.zip"
 
           if [ ! -f "$ZIP_FILE" ]; then
-            echo "ERROR: ZIP file not found in repository root"
+            echo "ERROR: V2.3.5 ZIP not found in repository root"
             exit 1
           fi
 
@@ -51,6 +51,7 @@ jobs:
 
           if [ -z "$SETTINGS_FILE" ]; then
             echo "ERROR: settings.gradle not found"
+            find extracted -maxdepth 4 -type f -print
             exit 1
           fi
 
@@ -67,18 +68,10 @@ jobs:
 
           echo "Building project: $PROJECT_DIR"
 
-          if [ -f "$PROJECT_DIR/gradlew" ]; then
-            chmod +x "$PROJECT_DIR/gradlew"
-            "$PROJECT_DIR/gradlew" \
-              -p "$PROJECT_DIR" \
-              --no-daemon \
-              assembleDebug
-          else
-            gradle \
-              -p "$PROJECT_DIR" \
-              --no-daemon \
-              assembleDebug
-          fi
+          gradle \
+            -p "$PROJECT_DIR" \
+            --no-daemon \
+            assembleDebug
 
       - name: Find and Prepare APK
         run: |
@@ -86,37 +79,32 @@ jobs:
 
           find extracted -type f -name "*.apk" -print
 
-          APK_PATH=$(find extracted -type f -name "*.apk" \
-            | grep -E '/debug/[^/]+\.apk$' \
-            | head -n 1 || true)
+          APK_PATH=$(find extracted -type f \
+            -path "*/build/outputs/apk/*/*.apk" \
+            -print -quit)
 
           if [ -z "$APK_PATH" ]; then
-            echo "Debug APK not found. Searching all APK files..."
+            echo "ERROR: APK not found"
+            echo "Checking build output folders..."
 
-            APK_PATH=$(find extracted -type f -name "*.apk" \
-              | head -n 1 || true)
-          fi
-
-          if [ -z "$APK_PATH" ]; then
-            echo "ERROR: APK not found anywhere in extracted project"
-            echo "Build output folders:"
             find extracted -type d -name build -print
+
             exit 1
           fi
 
-          echo "APK found at:"
+          echo "APK found:"
           echo "$APK_PATH"
 
           mkdir -p apk-output
 
           cp "$APK_PATH" \
-            apk-output/Electrician-Work-with-Chouhan-V2.3.4.apk
+            apk-output/Electrician-Work-with-Chouhan-V2.3.5.apk
 
           echo "APK prepared successfully"
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Electrician-Work-with-Chouhan-V2.3.4-APK
-          path: apk-output/Electrician-Work-with-Chouhan-V2.3.4.apk
+          name: Electrician-Work-with-Chouhan-V2.3.5-APK
+          path: apk-output/Electrician-Work-with-Chouhan-V2.3.5.apk
           if-no-files-found: error
