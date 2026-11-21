@@ -1,146 +1,102 @@
-name: Electrician Work with Chouhan V2.2 APK Build
+name: Build Electrician Work with Chouhan V2.2 APK
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - '**'
-      - '.github/workflows/build.yml'
-
-permissions:
-  contents: read
+workflow_dispatch:
+push:
+paths:
+- 'Electrician-Work-with-Chouhan-V2.2-FULL-Project.zip'
+- '.github/workflows/build.yml'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      # 1. Repository डाउनलोड करें
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v4
 
-      # 2. Java 17 सेट करें
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+  - name: Setup Java 17
+    uses: actions/setup-java@v5
+    with:
+      distribution: temurin
+      java-version: '17'
 
-      # 3. Gradle 8.9 सेट करें
-      - name: Setup Gradle 8.9
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
+  - name: Setup Gradle 8.9
+    uses: gradle/actions/setup-gradle@v4
+    with:
+      gradle-version: '8.9'
 
-      # 4. Android Project खोजें या ZIP Extract करें
-      - name: Find Android Project
-        id: find_project
-        shell: bash
-        run: |
-          set -euo pipefail
+  - name: Extract V2.2 Project Only
+    id: find_project
+    shell: bash
+    run: |
+      set -e
 
-          echo "Searching for Android project..."
+      ZIP_FILE="Electrician-Work-with-Chouhan-V2.2-FULL-Project.zip"
 
-          PROJECT_DIR=""
+      if [ ! -f "$ZIP_FILE" ]; then
+        echo "ERROR: V2.2 ZIP file not found in repository root!"
+        exit 1
+      fi
 
-          # पहले Repository में Gradle project खोजें
-          while IFS= read -r file; do
-            dir=$(dirname "$file")
+      mkdir -p v22_project
 
-            if [ -f "$dir/app/build.gradle" ] || \
-               [ -f "$dir/app/build.gradle.kts" ]; then
-              PROJECT_DIR="$dir"
-              break
-            fi
-          done < <(
-            find . -type f \
-              \( -name "settings.gradle" -o -name "settings.gradle.kts" \) \
-              -not -path "*/.gradle/*" \
-              -not -path "*/build/*"
-          )
+      unzip -q "$ZIP_FILE" -d v22_project
 
-          # यदि project नहीं मिला, तो ZIP फाइल Extract करें
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "Project not found directly. Searching ZIP files..."
+      PROJECT_DIR=$(find v22_project \
+        -type f \
+        -name "settings.gradle.kts" \
+        -print -quit \
+        | xargs -r dirname)
 
-            mkdir -p extracted_projects
+      if [ -z "$PROJECT_DIR" ]; then
+        echo "ERROR: Android project not found inside V2.2 ZIP!"
+        exit 1
+      fi
 
-            ZIP_FOUND="false"
+      echo "V2.2 Android project found:"
+      echo "$PROJECT_DIR"
 
-            while IFS= read -r zipfile; do
-              echo "Extracting: $zipfile"
+      echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
 
-              zipname=$(basename "$zipfile" .zip)
-              destination="extracted_projects/$zipname"
+  - name: Build V2.2 Debug APK
+    shell: bash
+    run: |
+      set -e
 
-              mkdir -p "$destination"
-              unzip -o "$zipfile" -d "$destination"
+      PROJECT_DIR="${{ steps.find_project.outputs.project_dir }}"
 
-              ZIP_FOUND="true"
-            done < <(
-              find . -maxdepth 2 -type f -name "*.zip" \
-                -not -path "./extracted_projects/*"
-            )
+      gradle \
+        -p "$PROJECT_DIR" \
+        --no-daemon \
+        assembleDebug
 
-            if [ "$ZIP_FOUND" = "false" ]; then
-              echo "ERROR: No Android project or ZIP found."
-              exit 1
-            fi
+  - name: Find APK
+    id: apk
+    shell: bash
+    run: |
+      set -e
 
-            # Extract किए गए project में Gradle file खोजें
-            while IFS= read -r file; do
-              dir=$(dirname "$file")
+      PROJECT_DIR="${{ steps.find_project.outputs.project_dir }}"
 
-              if [ -f "$dir/app/build.gradle" ] || \
-                 [ -f "$dir/app/build.gradle.kts" ]; then
-                PROJECT_DIR="$dir"
-                break
-              fi
-            done < <(
-              find extracted_projects -type f \
-                \( -name "settings.gradle" -o -name "settings.gradle.kts" \) \
-                -not -path "*/.gradle/*" \
-                -not -path "*/build/*"
-            )
-          fi
+      APK_PATH=$(find "$PROJECT_DIR" \
+        -type f \
+        -path "*/build/outputs/apk/debug/*.apk" \
+        -print -quit)
 
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "ERROR: Android Gradle project not found."
-            echo "Check that the ZIP contains settings.gradle and app/build.gradle."
-            exit 1
-          fi
+      if [ -z "$APK_PATH" ]; then
+        echo "ERROR: APK file was not created!"
+        exit 1
+      fi
 
-          PROJECT_DIR="${PROJECT_DIR#./}"
+      echo "APK created:"
+      echo "$APK_PATH"
 
-          echo "Android project found:"
-          echo "$PROJECT_DIR"
+      echo "apk_path=$APK_PATH" >> "$GITHUB_OUTPUT"
 
-          echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
-
-      # 5. Android APK Build करें
-      - name: Build Debug APK
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          PROJECT_DIR="${{ steps.find_project.outputs.project_dir }}"
-
-          echo "Building project from: $PROJECT_DIR"
-
-          gradle \
-            -p "$PROJECT_DIR" \
-            --no-daemon \
-            assembleDebug
-
-      # 6. APK Artifact Upload करें
-      - name: Upload V2.2 Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Electrician-Work-with-Chouhan-V2.2-debug-apk
-          path: |
-            **/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 14
+  - name: Upload V2.2 APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: Electrician-Work-with-Chouhan-V2.2-debug-apk
+      path: ${{ steps.apk.outputs.apk_path }}
+      if-no-files-found: error
