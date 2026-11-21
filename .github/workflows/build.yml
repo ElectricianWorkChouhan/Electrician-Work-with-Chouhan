@@ -1,10 +1,10 @@
-name: Build Electrician Work V2.3.6 APK
+name: Build Electrician Work V2.3.7 APK
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'Electrician-Work-with-Chouhan-V2.3.6-FULL-Project.zip'
+      - 'Electrician-Work-with-Chouhan-V2.3.7-FULL-Project.zip'
       - '.github/workflows/**'
 
 jobs:
@@ -26,19 +26,19 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Extract V2.3.6 Project ZIP
+      - name: Extract V2.3.7 Project ZIP
         run: |
-          ZIP_FILE="Electrician-Work-with-Chouhan-V2.3.6-FULL-Project.zip"
+          ZIP_FILE="Electrician-Work-with-Chouhan-V2.3.7-FULL-Project.zip"
 
           if [ ! -f "$ZIP_FILE" ]; then
-            echo "ERROR: V2.3.6 ZIP not found in repository root"
+            echo "ERROR: V2.3.7 ZIP not found in repository root"
             exit 1
           fi
 
           mkdir -p extracted
           unzip -q "$ZIP_FILE" -d extracted
 
-          echo "ZIP extracted successfully"
+          echo "V2.3.7 ZIP extracted successfully"
 
       - name: Find Android Project
         id: project
@@ -107,13 +107,13 @@ jobs:
           mkdir -p apk-output
 
           cp "$APK_PATH" \
-            apk-output/Electrician-Work-with-Chouhan-V2.3.6.apk
+            apk-output/Electrician-Work-with-Chouhan-V2.3.7.apk
 
           echo "APK prepared successfully"
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Electrician-Work-with-Chouhan-V2.3.6-APK
-          path: apk-output/Electrician-Work-with-Chouhan-V2.3.6.apk
+          name: Electrician-Work-with-Chouhan-V2.3.7-APK
+          path: apk-output/Electrician-Work-with-Chouhan-V2.3.7.apk
           if-no-files-found: error
