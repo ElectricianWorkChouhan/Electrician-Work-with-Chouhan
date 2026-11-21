@@ -1,102 +1,63 @@
-name: Build Electrician Work with Chouhan V2.2 APK
+name: Electrician Work with Chouhan V2.2 APK
 
-on:
-workflow_dispatch:
-push:
-paths:
-- 'Electrician-Work-with-Chouhan-V2.2-FULL-Project.zip'
-- '.github/workflows/build.yml'
+"on":
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Electrician-Work-with-Chouhan-V2.2-FULL-Project.zip'
+      - '.github/workflows/build.yml'
 
 jobs:
-build:
-runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-steps:
-  - name: Checkout Repository
-    uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  - name: Setup Java 17
-    uses: actions/setup-java@v5
-    with:
-      distribution: temurin
-      java-version: '17'
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-  - name: Setup Gradle 8.9
-    uses: gradle/actions/setup-gradle@v4
-    with:
-      gradle-version: '8.9'
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
 
-  - name: Extract V2.2 Project Only
-    id: find_project
-    shell: bash
-    run: |
-      set -e
+      - name: Extract V2.2 project ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      ZIP_FILE="Electrician-Work-with-Chouhan-V2.2-FULL-Project.zip"
+          ZIP_FILE="Electrician-Work-with-Chouhan-V2.2-FULL-Project.zip"
 
-      if [ ! -f "$ZIP_FILE" ]; then
-        echo "ERROR: V2.2 ZIP file not found in repository root!"
-        exit 1
-      fi
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "ERROR: $ZIP_FILE is not in the repository root."
+            exit 1
+          fi
 
-      mkdir -p v22_project
+          mkdir -p extracted_v22
+          unzip -q "$ZIP_FILE" -d extracted_v22
 
-      unzip -q "$ZIP_FILE" -d v22_project
+          PROJECT_DIR="extracted_v22/Electrician-Work-with-Chouhan-Updated"
 
-      PROJECT_DIR=$(find v22_project \
-        -type f \
-        -name "settings.gradle.kts" \
-        -print -quit \
-        | xargs -r dirname)
+          if [ ! -f "$PROJECT_DIR/settings.gradle.kts" ] || [ ! -f "$PROJECT_DIR/app/build.gradle.kts" ]; then
+            echo "ERROR: Expected V2.2 Android project files were not found in the ZIP."
+            exit 1
+          fi
 
-      if [ -z "$PROJECT_DIR" ]; then
-        echo "ERROR: Android project not found inside V2.2 ZIP!"
-        exit 1
-      fi
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-      echo "V2.2 Android project found:"
-      echo "$PROJECT_DIR"
+      - name: Build V2.2 debug APK
+        shell: bash
+        run: |
+          gradle -p "$PROJECT_DIR" --no-daemon assembleDebug
 
-      echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
-
-  - name: Build V2.2 Debug APK
-    shell: bash
-    run: |
-      set -e
-
-      PROJECT_DIR="${{ steps.find_project.outputs.project_dir }}"
-
-      gradle \
-        -p "$PROJECT_DIR" \
-        --no-daemon \
-        assembleDebug
-
-  - name: Find APK
-    id: apk
-    shell: bash
-    run: |
-      set -e
-
-      PROJECT_DIR="${{ steps.find_project.outputs.project_dir }}"
-
-      APK_PATH=$(find "$PROJECT_DIR" \
-        -type f \
-        -path "*/build/outputs/apk/debug/*.apk" \
-        -print -quit)
-
-      if [ -z "$APK_PATH" ]; then
-        echo "ERROR: APK file was not created!"
-        exit 1
-      fi
-
-      echo "APK created:"
-      echo "$APK_PATH"
-
-      echo "apk_path=$APK_PATH" >> "$GITHUB_OUTPUT"
-
-  - name: Upload V2.2 APK
-    uses: actions/upload-artifact@v4
-    with:
-      name: Electrician-Work-with-Chouhan-V2.2-debug-apk
-      path: ${{ steps.apk.outputs.apk_path }}
-      if-no-files-found: error
+      - name: Upload V2.2 debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Electrician-Work-with-Chouhan-V2.2-debug-apk
+          path: extracted_v22/Electrician-Work-with-Chouhan-Updated/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
